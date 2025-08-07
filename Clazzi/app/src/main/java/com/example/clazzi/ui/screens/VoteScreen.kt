@@ -109,37 +109,18 @@ fun VoteScreen(
             )
 
             Spacer(Modifier.height(20.dp))
-            Button(
-                onClick = {selectOption = 1},
-                colors = ButtonDefaults.buttonColors(
-                    if(selectOption == 1) Color(0xFF13F8A5)
-                    else Color.LightGray.copy(alpha = 0.5f)
-                ),
-                modifier = Modifier.width(200.dp)
-            ) {
-                Text("더 후드")
-            }
 
-            Button(
-                onClick = {selectOption = 2},
-                colors = ButtonDefaults.buttonColors(
-                    if(selectOption == 2) Color(0xFF13F8A5)
-                    else Color.LightGray.copy(alpha = 0.5f)
-                ),
-                modifier = Modifier.width(200.dp)
-            ) {
-                Text("순배순대국")
-            }
-
-            Button(
-                onClick = {selectOption = 3},
-                colors = ButtonDefaults.buttonColors(
-                    if(selectOption == 3) Color(0xFF13F8A5)
-                    else Color.LightGray.copy(alpha = 0.5f)
-                ),
-                modifier = Modifier.width(200.dp)
-            ) {
-                Text("부산간짜장")
+            vote.voteOptions.forEachIndexed{ index, voteOption ->
+                Button(
+                    onClick = {selectOption = index},
+                    colors = ButtonDefaults.buttonColors(
+                        if(selectOption == index) Color(0xFF13F8A5)
+                        else Color.LightGray.copy(alpha = 0.5f)
+                    ),
+                    modifier = Modifier.width(200.dp)
+                ) {
+                    Text(voteOption.optionText)
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))

@@ -19,28 +19,33 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.clazzi.model.Vote
 import com.example.clazzi.model.VoteOption
 import com.example.clazzi.ui.theme.ClazziTheme
+import com.example.clazzi.viewmodel.VoteListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoteListScreen(
     navController: NavController,
-    voteList: List<Vote>,
+    viewModel: VoteListViewModel,
     onVoteClicked: (String) -> Unit,
 ) {
+    val voteList by viewModel.voteList.collectAsState()
 
 
     Scaffold(
-        topBar =  {
+        topBar = {
             TopAppBar(
-                title = {Text("투표 목록")}
+                title = { Text("투표 목록") }
             )
         },
         floatingActionButton = {
@@ -52,14 +57,15 @@ fun VoteListScreen(
                 Icon(Icons.Default.Add, contentDescription = "투표 생성")
             }
         }
-    ){ innerPadding ->
+    ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(voteList) { vote ->
-                Card (
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
@@ -67,7 +73,7 @@ fun VoteListScreen(
                             onVoteClicked(vote.id)
                         }
                 ) {
-                    Column (
+                    Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(vote.title)
@@ -85,7 +91,7 @@ fun VoteListScreenPreview() {
     ClazziTheme {
         VoteListScreen(
             navController = NavController(LocalContext.current),
-            listOf(),
+            viewModel = viewModel(),
             onVoteClicked = {}
         )
     }
