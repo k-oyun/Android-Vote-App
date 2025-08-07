@@ -39,18 +39,25 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.clazzi.model.Vote
+import com.example.clazzi.viewmodel.VoteListViewModel
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoteScreen(
     vote: Vote,
-    navController: NavController
+    navController: NavController,
+    viewModel : VoteListViewModel
 ) {
     var selectOption by remember { mutableStateOf(0) }
-
+    var hasVoted by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar =  {
             TopAppBar(
@@ -125,7 +132,29 @@ fun VoteScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
             Button(
-                onClick = {},
+                onClick = {
+                    if(!hasVoted) {
+                        coroutineScope.launch {
+                            val voteId = UUID.randomUUID().toString().toString()
+                            val selectedOption = vote.voteOptions[selectOption]
+
+                            val updatedOption = selectedOption.copy (
+                                voters = selectedOption.voters + voteId
+                            )
+                            val updatedOptions = vote.voteOptions.mapIndexed {index, option ->
+                                if(index == selectOption) updatedOption else option
+                            }
+
+                            val updatedVote = vote.copy(
+                                voteOptions = updatedOptions
+                            )
+
+                            viewModel.setVote(updatedVote)
+                            hasVoted = true
+                        }
+                    }
+                },
+                enabled = !hasVoted,
                 modifier = Modifier.width(200.dp)
             ) {
                 Text("투표하기")

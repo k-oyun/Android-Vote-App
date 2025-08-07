@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import com.example.clazzi.model.Vote
 import com.example.clazzi.model.VoteOption
 import com.example.clazzi.viewmodel.VoteListViewModel
+import java.util.Date
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,6 +111,7 @@ fun CreateVoteScreen(
                     val newVote = Vote(
                         id = UUID.randomUUID().toString(),
                         title = title,
+                        createAt = Date(),
                         voteOptions = options
                             .filter {it.isNotBlank()}
                             .map{

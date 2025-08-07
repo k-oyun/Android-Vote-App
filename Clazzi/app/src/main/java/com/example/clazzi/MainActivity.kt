@@ -5,8 +5,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,66 +21,79 @@ import com.example.clazzi.ui.screens.VoteScreen
 import com.example.clazzi.ui.theme.ClazziTheme
 import com.example.clazzi.viewmodel.VoteListViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
+
+
+    fun onVoteClicked(voteId: String) {
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ClazziTheme {
                 val navController = rememberNavController()
-                val voteListViewModel = viewModel<VoteListViewModel>()
-                NavHost(
-                    navController = navController, startDestination = "voteList"
-//                    navController = navController, startDestination = "createVote"
-                ) {
+                val viewListViewModel = viewModel<VoteListViewModel>()
+                NavHost(navController = navController, startDestination = "voteList") {
+//                    composable("vote") {
+//                        VoteScreen(
+//                            navController = navController
+//                        )
+//                    }
                     composable("voteList") {
                         VoteListScreen(
                             navController = navController,
-                            viewModel = voteListViewModel,
+                            viewModel = viewListViewModel,
                             onVoteClicked = { voteId ->
                                 navController.navigate("vote/$voteId")
-                            })
+
+                            }
+                        )
                     }
+
                     composable("vote/{voteId}") { backStackEntry ->
                         val voteId = backStackEntry.arguments?.getString("voteId") ?: "1"
-                        val vote = voteListViewModel.getVoteById(voteId)
+                        val vote = viewListViewModel.getVoteById(voteId)
                         if (vote != null) {
                             VoteScreen(
                                 vote = vote,
-                                navController = navController
+                                navController = navController,
+                                viewModel = viewListViewModel
                             )
-                        }
-                        else {
+                        } else {
                             val context = LocalContext.current
-                            Toast.makeText(context, "투표를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "해당 투표가 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
                         }
 
                     }
 
-                    // 복잡한 플젝 시
 //                    composable("createVote") {
 //                        CreateVoteScreen(
+//                            navController,
 //                            onVoteCreate = { vote ->
 //                                navController.popBackStack()
-//                                voteListViewModel.addVote(vote)
-//                            }
-//                        )
+//                                viewListViewModel.addVote(vote)
+//                            })
 //                    }
 
-                    // 간단한 플젝 시
-                    // 플젝할때 뷰 모델의 인터페이스도 만들어라 오윤아
                     composable("createVote") {
                         CreateVoteScreen(
-                            navController = navController,
-                           viewModel = voteListViewModel,
+                            viewListViewModel,
+                            navController,
+//                            onVoteCreate = { vote ->
+//                                navController.popBackStack()
+//                                viewListViewModel
+//                            }
+
                         )
                     }
                 }
-
             }
         }
     }
 }
+
+
 
 
