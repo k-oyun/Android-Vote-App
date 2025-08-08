@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.clazzi.model.Vote
 import com.example.clazzi.model.VoteOption
+import com.example.clazzi.ui.screens.AuthScreen
 import com.example.clazzi.ui.screens.CreateVoteScreen
 import com.example.clazzi.ui.screens.VoteListScreen
 import com.example.clazzi.ui.screens.VoteScreen
@@ -35,7 +36,15 @@ class MainActivity : ComponentActivity() {
             ClazziTheme {
                 val navController = rememberNavController()
                 val viewListViewModel = viewModel<VoteListViewModel>()
-                NavHost(navController = navController, startDestination = "voteList") {
+//                NavHost(navController = navController, startDestination = "voteList") {
+                NavHost(
+                    navController = navController,
+                    startDestination = "auth"
+//                    startDestination = "createVote"
+                ) {
+                    composable("auth") {
+                        AuthScreen()
+                    }
 //                    composable("vote") {
 //                        VoteScreen(
 //                            navController = navController

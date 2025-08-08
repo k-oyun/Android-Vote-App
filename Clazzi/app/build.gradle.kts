@@ -46,6 +46,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:24.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+    implementation("androidx.compose.material:material-icons-extended")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
