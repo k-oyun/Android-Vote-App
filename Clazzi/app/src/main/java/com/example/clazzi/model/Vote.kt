@@ -6,7 +6,8 @@ data class Vote(
     val id: String = "",
     val title: String = "",
     val createAt: Date? = null,  // 투표 생성 날짜
-    val voteOptions: List<VoteOption> = emptyList()
+    val voteOptions: List<VoteOption> = emptyList(),
+    val imageUrl: String? = null
 ) {
     val optionCount: Int  // 투표 세부 항목 개수
         get() = voteOptions.size

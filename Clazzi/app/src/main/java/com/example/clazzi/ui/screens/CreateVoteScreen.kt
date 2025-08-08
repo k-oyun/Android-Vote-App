@@ -1,10 +1,10 @@
 package com.example.clazzi.ui.screens
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,15 +15,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,8 +42,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.clazzi.model.Vote
 import com.example.clazzi.model.VoteOption
+import com.example.clazzi.ui.components.CameraPickerWithPermission
 import com.example.clazzi.ui.components.ImagePickerWithPermission
 import com.example.clazzi.viewmodel.VoteListViewModel
 import java.util.Date
@@ -58,6 +63,7 @@ fun CreateVoteScreen(
     val options = remember { mutableStateListOf<String>("", "") }
     var showImagePickTypeSheet by remember { mutableStateOf(false)}
     var showImagePicker by remember { mutableStateOf(false) }
+    var showCameraPicker by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 //    val optionText: List<String> = arrayListOf("항목 1", "항목 2")
     Scaffold (
@@ -85,7 +91,10 @@ fun CreateVoteScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Image(
-                painter = painterResource(id = android.R.drawable.ic_menu_gallery),
+                painter = if( imageUri != null)
+                    rememberAsyncImagePainter(imageUri)
+                else
+                    painterResource(id = android.R.drawable.ic_menu_gallery),
                 contentDescription = "투표 사진",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -107,6 +116,7 @@ fun CreateVoteScreen(
                         modifier = Modifier
                             .clickable {
                                 showImagePickTypeSheet = false
+                                showCameraPicker = true
                             }
                     )
                     ListItem(
@@ -126,6 +136,16 @@ fun CreateVoteScreen(
                     onImagePicked = { uri ->
                         imageUri = uri
                         showImagePicker = false
+                    }
+                )
+            }
+
+            // 권한 팝업 및 카메라
+            if(showCameraPicker) {
+                CameraPickerWithPermission(
+                    onImageCaptured = { uri ->
+                        imageUri = uri
+                        showCameraPicker = false
                     }
                 )
             }
@@ -165,7 +185,8 @@ fun CreateVoteScreen(
                             }
                     )
 //                    onVoteCreate(newVote)
-                    viewModel.addVote(newVote)
+                    Log.e("테스","여기테스트!!!!" + imageUri)
+                    viewModel.addVote(newVote, navController.context, imageUri!!)
                     navController.popBackStack()
                 },
                 modifier = Modifier

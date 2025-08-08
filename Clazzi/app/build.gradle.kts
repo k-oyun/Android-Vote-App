@@ -1,10 +1,11 @@
-import org.gradle.api.JavaVersion
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
 }
+
 
 android {
     namespace = "com.example.clazzi"
@@ -42,12 +43,13 @@ android {
 }
 
 dependencies {
-//    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-firestore-ktx:24.10.0")
     implementation("androidx.navigation:navigation-compose:2.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.10.0") //파이어베이스
     implementation("androidx.compose.material:material-icons-extended")
     implementation("com.google.firebase:firebase-auth:22.3.0")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
