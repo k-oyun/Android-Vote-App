@@ -26,11 +26,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.clazzi.R
 import com.example.clazzi.model.Vote
 import com.example.clazzi.model.VoteOption
 import com.example.clazzi.ui.theme.ClazziTheme
@@ -47,7 +49,7 @@ fun VoteListScreen(
     val voteList by viewModel.voteList.collectAsState()
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text(text = "투표 목록") })
+            title = { Text(stringResource(R.string.vote_list_title)) })
     }, floatingActionButton = {
         FloatingActionButton(
             onClick = {
