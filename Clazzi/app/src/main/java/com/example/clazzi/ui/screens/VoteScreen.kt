@@ -45,6 +45,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.clazzi.model.Vote
 import com.example.clazzi.viewmodel.VoteListViewModel
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -135,7 +136,10 @@ fun VoteScreen(
                 onClick = {
                     if(!hasVoted) {
                         coroutineScope.launch {
-                            val voteId = UUID.randomUUID().toString().toString()
+                            val user = FirebaseAuth.getInstance().currentUser
+                            val uid = user?.uid ?: "0"
+
+                            val voteId = uid
                             val selectedOption = vote.voteOptions[selectOption]
 
                             val updatedOption = selectedOption.copy (

@@ -1,5 +1,7 @@
 package com.example.clazzi.ui.screens
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,17 +31,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AuthScreen() {
+fun AuthScreen(
+    navController: NavController
+) {
 
     val(email, setEmail) = remember { mutableStateOf("") }
     val(password, setPassword) = remember { mutableStateOf("") }
 
-    val isLogin by remember {mutableStateOf(false)}
+    var isLogin by remember {mutableStateOf(false)}
     val passwordVisible = remember {mutableStateOf(false)}
 
+    val auth = FirebaseAuth.getInstance()
 
     Scaffold(
         modifier = Modifier
@@ -94,12 +101,38 @@ fun AuthScreen() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { }
+                onClick = {
+                    // 로그인 일때
+                    if(isLogin) {
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    navController.navigate("voteList")
+                                } else {
+                                    Log.w("AuthScreen","로그인 실패", task.exception)
+                                }
+                            }
+                    }
+                    // 회원가입 일때
+                    else {
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    navController.navigate("voteList")
+                                } else {
+                                    Log.w("AuthScreen","회원가입 실패", task.exception)
+                                }
+                            }
+                    }
+                }
             ) {
                 Text("${if(isLogin)"로그인" else "회원가입"}")
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(if (isLogin) "회원가입 하시겠습니까?" else "이미 계정이 있으신가요?")
+            Text( text = if (isLogin) "회원가입 하시겠습니까?" else "이미 계정이 있으신가요?",
+                modifier = Modifier
+                    .clickable { isLogin = !isLogin }
+            )
         }
 
     }

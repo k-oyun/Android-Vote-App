@@ -17,18 +17,14 @@ import com.example.clazzi.model.Vote
 import com.example.clazzi.model.VoteOption
 import com.example.clazzi.ui.screens.AuthScreen
 import com.example.clazzi.ui.screens.CreateVoteScreen
+import com.example.clazzi.ui.screens.MyPAgeScreen
 import com.example.clazzi.ui.screens.VoteListScreen
 import com.example.clazzi.ui.screens.VoteScreen
 import com.example.clazzi.ui.theme.ClazziTheme
 import com.example.clazzi.viewmodel.VoteListViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
-
-
-    fun onVoteClicked(voteId: String) {
-
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,13 +33,22 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val viewListViewModel = viewModel<VoteListViewModel>()
 //                NavHost(navController = navController, startDestination = "voteList") {
+
+                val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
                 NavHost(
                     navController = navController,
-                    startDestination = "auth"
-//                    startDestination = "createVote"
+                    startDestination = if (isLoggedIn) "voteList" else "auth"
                 ) {
                     composable("auth") {
-                        AuthScreen()
+                        AuthScreen(
+                            navController = navController
+                        )
+                    }
+
+                    composable("myPage") {
+                        MyPAgeScreen(
+                            navController = navController
+                        )
                     }
 //                    composable("vote") {
 //                        VoteScreen(
