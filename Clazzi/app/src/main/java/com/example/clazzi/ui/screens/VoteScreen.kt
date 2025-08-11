@@ -95,7 +95,7 @@ fun VoteScreen(vote: Vote, navController: NavController, viewModel: VoteListView
             )
             Spacer(modifier = Modifier.height(40.dp))
             Text(
-                text = "소풍 같이 가고 싶은 사람", style = TextStyle(
+                text = vote.title, style = TextStyle(
                     fontSize = 20.sp, fontWeight = FontWeight.Bold
                 )
             )
