@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun MyPAgeScreen(navController : NavController) {
+fun MyPageScreen(navController : NavController) {
     val auth = FirebaseAuth.getInstance()
     Scaffold (
         modifier = Modifier

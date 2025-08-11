@@ -1,5 +1,4 @@
-package com.example.clazzi.ui.screens
-
+import android.R.attr.text
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -31,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,99 +59,107 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoteScreen(
-    voteId: String,
     navController: NavController,
-    voteListViewModel: VoteListViewModel
+    voteListViewModel: VoteListViewModel,
+    voteId: String
 ) {
-
     val voteViewModel: VoteViewModel = viewModel()
 
     // 초기 데이터 로드
     LaunchedEffect(voteId) {
-        voteViewModel.loadVote(voteId, voteListViewModel)
+        voteViewModel.loadVote(voteId)
     }
 
-    // vote 스테이트
+    // vote state
     val vote = voteViewModel.vote.collectAsState().value
 
-    // 현재 파이어베이스  사용자 아이디 가져오기
+    // 현재 Firebase 사용자 아이디 가져오기
     val user = FirebaseAuth.getInstance().currentUser
     val currentUserId = user?.uid ?: "0"
 
-
     var hasVoted by remember { mutableStateOf(false) }
     LaunchedEffect(vote) {
-        if(vote != null) {
+        if (vote != null) {
             hasVoted = vote.voteOptions.any { option ->
                 option.voters.contains(currentUserId)
             }
         }
     }
 
-    // 전체 투표소
-    val totalVotes = vote?.voteOptions?.sumOf {it.voters.size} ?: 1
+    // 전체 투표 수
+    val totalVotes = vote?.voteOptions?.sumOf { it.voters.size } ?: 1
 
-
-    var selectionOption by remember { mutableStateOf(0) }
-    var coroutineScope = rememberCoroutineScope()
+    var selectedOptionIndex by remember { mutableIntStateOf(0) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "투표") },
+                title = { Text("투표") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
+                    ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "뒤로가기"
                         )
                     }
-                })
-        },
+                }
+            )
+        }
     ) { innerPadding ->
         if (vote == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentAlignment =  Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
-        }
-        else {
+        } else {
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
+                    .padding(16.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
-
             ) {
                 Text(
                     text = buildAnnotatedString {
                         append("친구들과 ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
                             append("서로 투표")
                         }
                         append("하며\n")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
                             append("익명")
                         }
                         append("으로 마음을 전해요")
-                    }, fontSize = 18.sp
+                    },
+                    fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(Modifier.height(40.dp))
                 Text(
-                    text = vote.title, style = TextStyle(
-                        fontSize = 20.sp, fontWeight = FontWeight.Bold
+                    text = vote.title,
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
+                Spacer(Modifier.height(20.dp))
                 Image(
-                    painter = if (vote.imageUrl != null) rememberAsyncImagePainter(vote.imageUrl) else
-                        painterResource(id = android.R.drawable.ic_menu_gallery),
+                    painter = if (vote.imageUrl != null) rememberAsyncImagePainter(vote.imageUrl)
+                    else painterResource(id = android.R.drawable.ic_menu_gallery),
                     contentDescription = "투표 사진",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -161,25 +169,23 @@ fun VoteScreen(
                 )
                 Spacer(Modifier.height(20.dp))
 
-                if(!hasVoted) {
+                if (!hasVoted) {    // 투표 하지 않았을 때
                     vote.voteOptions.forEachIndexed { index, voteOption ->
                         Button(
                             onClick = {
-                                selectionOption = index
+                                selectedOptionIndex = index
                             },
                             colors = ButtonDefaults.buttonColors(
-                                if (selectionOption == index) Color(0xFF13F8A5) else Color.LightGray.copy(
-                                    alpha = 0.5f
-                                )
+                                if (selectedOptionIndex == index) Color(0xFF13F8A5)
+                                else Color.LightGray.copy(alpha = 0.5f)
                             ),
                             modifier = Modifier.width(200.dp)
                         ) {
                             Text(voteOption.optionText)
                         }
                     }
-                } else {
-                    vote.voteOptions
-                        .sortedByDescending { it.voters.size }
+                } else {    // 투표 했을 때
+                    vote.voteOptions.sortedByDescending { it.voters.size }
                         .forEach { option ->
                             val isMyVote = option.voters.contains(currentUserId)
                             val percent = option.voters.size.toFloat() / totalVotes
@@ -189,15 +195,15 @@ fun VoteScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                                     .background(
-                                        if (isMyVote) Color(0xFF13F8A5).copy(0.4f)
-                                        else Color.LightGray.copy(0.3f),
+                                        color = if (isMyVote) Color(0xFF13F8A5).copy(0.4f)
+                                        else Color.LightGray.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(12.dp)
                                     )
                                     .padding(12.dp)
                             ) {
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = option.optionText,
@@ -205,61 +211,54 @@ fun VoteScreen(
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.weight(1f)
                                     )
-
                                     Text(
                                         text = "${option.voters.size}",
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
                                     )
-
-                                    if(isMyVote) {
+                                    if (isMyVote) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
                                             contentDescription = "내가 투표한 항목",
                                             tint = Color(0xFF13F8A5),
-                                            modifier = Modifier.padding(start = 8.dp)
+                                            modifier = Modifier.padding(8.dp)
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    LinearProgressIndicator(
-                                        progress = {percent},
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(8.dp)
-                                            .clip(RoundedCornerShape(4.dp)),
-                                        color = Color(0xFF13F8A5),
-                                        trackColor = Color.White.copy(alpha = 0.4f),
-                                    )
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                LinearProgressIndicator(
+                                    progress = { percent },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    color = Color(0xFF13F8A5),
+                                    trackColor = Color.White.copy(0.4f)
+                                )
                             }
                         }
                 }
 
-
-
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(40.dp))
                 Button(
                     onClick = {
                         if (!hasVoted) {
                             coroutineScope.launch {
-                                val user = FirebaseAuth.getInstance().currentUser
-                                val uid = user?.uid ?: "0"
-                                val voteId = uid
-                                val selectedOption = vote.voteOptions[selectionOption]
+                                val selectedOption = vote.voteOptions[selectedOptionIndex]
 
-                                val updatedOption = selectedOption.copy(
-                                    voters = selectedOption.voters + voteId
+                                val updateOption = selectedOption.copy(
+                                    voters = selectedOption.voters + currentUserId
                                 )
 
                                 val updatedOptions = vote.voteOptions.mapIndexed { index, option ->
-                                    if (index == selectionOption) updatedOption else option
+                                    if (index == selectedOptionIndex) updateOption else option
                                 }
+
                                 val updatedVote = vote.copy(
                                     voteOptions = updatedOptions
                                 )
 
                                 voteListViewModel.setVote(updatedVote)
-                                hasVoted = true;
                             }
                         }
                     },
@@ -268,27 +267,8 @@ fun VoteScreen(
                 ) {
                     Text("투표하기")
                 }
-
             }
         }
 
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun VoteScreenPreview() {
-//    ClazziTheme {
-//        VoteScreen(
-//            Vote(
-//                "1", "오늘 점심 뭐먹을 까요", listOf(
-//                    VoteOption("1", "삼겹살"),
-//                    VoteOption("2", "치킨"),
-//                    VoteOption("3", "피자"),
-//                )
-//            ),
-//            navController = Any(
-//        )
-//    }
-//}

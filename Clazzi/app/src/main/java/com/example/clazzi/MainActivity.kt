@@ -1,5 +1,6 @@
 package com.example.clazzi
 
+import VoteScreen
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -12,9 +13,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.clazzi.ui.screens.AuthScreen
 import com.example.clazzi.ui.screens.CreateVoteScreen
-import com.example.clazzi.ui.screens.MyPAgeScreen
+import com.example.clazzi.ui.screens.MyPageScreen
 import com.example.clazzi.ui.screens.VoteListScreen
-import com.example.clazzi.ui.screens.VoteScreen
 import com.example.clazzi.ui.theme.ClazziTheme
 import com.example.clazzi.viewmodel.VoteListViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("myPage") {
-                        MyPAgeScreen(
+                        MyPageScreen(
                             navController = navController
                         )
                     }
