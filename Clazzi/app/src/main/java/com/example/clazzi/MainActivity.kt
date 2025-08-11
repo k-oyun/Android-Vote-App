@@ -5,16 +5,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.clazzi.model.Vote
-import com.example.clazzi.model.VoteOption
 import com.example.clazzi.ui.screens.AuthScreen
 import com.example.clazzi.ui.screens.CreateVoteScreen
 import com.example.clazzi.ui.screens.MyPAgeScreen
@@ -25,6 +20,12 @@ import com.example.clazzi.viewmodel.VoteListViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
+
+
+    fun onVoteClicked(voteId: String) {
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -71,9 +72,9 @@ class MainActivity : ComponentActivity() {
                         val vote = viewListViewModel.getVoteById(voteId)
                         if (vote != null) {
                             VoteScreen(
-                                vote = vote,
+                                voteId = voteId,
                                 navController = navController,
-                                viewModel = viewListViewModel
+                                voteListViewModel = viewListViewModel
                             )
                         } else {
                             val context = LocalContext.current
