@@ -1,16 +1,31 @@
 package com.example.clazzi
 
+import androidx.compose.material.BottomNavigation
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+//import androidx.compose.material.icons.filled.List
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.example.clazzi.repository.FirebaseVoteRepository
@@ -22,11 +37,13 @@ import com.example.clazzi.ui.screens.VoteScreen
 import com.example.clazzi.ui.theme.ClazziTheme
 import com.example.clazzi.viewmodel.VoteListViewModel
 import com.example.clazzi.ui.screens.AuthScreen
+import com.example.clazzi.ui.screens.ChatScreen
 import com.example.clazzi.ui.screens.MyPageScreen
 import com.example.clazzi.viewmodel.VoteListViewModelFactory
 import com.example.clazzi.viewmodel.VoteViewModel
 import com.example.clazzi.viewmodel.VoteViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +54,8 @@ class MainActivity : ComponentActivity() {
             ClazziTheme {
                 val navController = rememberNavController()
 
-//                val repo = FirebaseVoteRepository() // 파이어베이스 연동
-                val repo = RestApiVoteRepository(ApiClient.voteApiService) // restapi 연동
+                val repo = FirebaseVoteRepository() // 파이어베이스 연동
+//                val repo = RestApiVoteRepository(ApiClient.voteApiService) // restapi 연동
                 val voteListViewModel : VoteListViewModel = viewModel(
                     factory = VoteListViewModelFactory(repo)
                 )
@@ -49,29 +66,22 @@ class MainActivity : ComponentActivity() {
                 )
 
                 val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
+
+
                 NavHost(
                     navController = navController,
-                    startDestination = if (isLoggedIn) "voteList" else "auth"
+                    startDestination = if (isLoggedIn) "main" else "auth"
                 ) {
                     composable("auth") {
                         AuthScreen(
                             navController = navController
                         )
                     }
-                    composable("myPage") {
-                        MyPageScreen(
-                            navController = navController
-                        )
+
+                    composable("main") {
+                        MainScreen(voteListViewModel)
                     }
-                    composable("voteList") {
-                        VoteListScreen(
-                            navController = navController,
-                            viewModel = voteListViewModel,
-                            onVoteClicked = { voteId ->
-                                navController.navigate("vote/$voteId")
-                            }
-                        )
-                    }
+
                     composable(
                         "vote/{voteId}",
                         deepLinks = listOf(
@@ -119,3 +129,82 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+sealed class BottomNavItem(val route:String, val icon: ImageVector, val label: String) {
+    object VoteList: BottomNavItem("voteList", Icons.AutoMirrored.Filled.List, "투표")
+    object Chat: BottomNavItem("chat", Icons.AutoMirrored.Filled.List, "채팅")
+    object MyPage: BottomNavItem("myPage", Icons.AutoMirrored.Filled.List, "마이페이지")
+}
+
+@Composable
+fun MainScreen(
+    voteListViewModel: VoteListViewModel
+) {
+    val navController = rememberNavController()
+    Scaffold (
+        bottomBar = {
+            BottomNavigationBar(navController)
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "voteList",
+            modifier = Modifier
+                .padding(innerPadding)
+        ) {
+            val repo = FirebaseVoteRepository() // 파이어베이스 연동
+
+//            val voteListViewModel : VoteListViewModel = viewModel(
+//                factory = VoteListViewModelFactory(repo)
+//            )
+            composable(BottomNavItem.VoteList.route) {
+                VoteListScreen(
+                    navController = navController,
+                    viewModel = voteListViewModel,
+                    onVoteClicked = { voteId ->
+                        navController.navigate("vote/$voteId")
+                    }
+                )
+            }
+            composable(BottomNavItem.Chat.route) {
+                ChatScreen()
+            }
+
+            composable(BottomNavItem.MyPage.route) {
+                MyPageScreen(
+                    navController = navController
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(
+        BottomNavItem.VoteList,
+        BottomNavItem.Chat,
+        BottomNavItem.MyPage,
+    )
+    BottomNavigation {
+        val currentRoute = navController
+            .currentBackStackEntryAsState().value?.destination?.route
+        items.forEach { item ->
+            BottomNavigationItem(
+                icon = { Icon(item.icon, contentDescription = item.label) },
+                label = { Text(item.label) },
+                selected = currentRoute == item.route,
+                onClick= {
+                    navController.navigate(item.route) {
+                        //중복 네비게이션 방지 및 스택 관리
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+
+                    }
+                }
+            )
+        }
+    }
+}
