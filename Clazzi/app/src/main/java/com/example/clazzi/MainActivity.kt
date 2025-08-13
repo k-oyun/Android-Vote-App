@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 //import androidx.compose.material.icons.filled.List
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -37,12 +42,14 @@ import com.example.clazzi.ui.screens.VoteScreen
 import com.example.clazzi.ui.theme.ClazziTheme
 import com.example.clazzi.viewmodel.VoteListViewModel
 import com.example.clazzi.ui.screens.AuthScreen
+import com.example.clazzi.ui.screens.ChatRoomScreen
 import com.example.clazzi.ui.screens.ChatScreen
 import com.example.clazzi.ui.screens.MyPageScreen
 import com.example.clazzi.viewmodel.VoteListViewModelFactory
 import com.example.clazzi.viewmodel.VoteViewModel
 import com.example.clazzi.viewmodel.VoteViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class MainActivity : ComponentActivity() {
@@ -65,8 +72,18 @@ class MainActivity : ComponentActivity() {
                     factory = VoteViewModelFactory(repo)
                 )
 
+                val auth = FirebaseAuth.getInstance()
                 val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
+                // 사용자 등록 (앱 시작 시 닉네임 저장)
+                LaunchedEffect(auth.currentUser) {
+                    auth.currentUser?.let { user ->
+                        val nickname = user.uid.take(4)
+                        FirebaseFirestore.getInstance().collection("users")
+                            .document(user.uid)
+                            .set(mapOf("nickname" to nickname))
+                    }
+                }
 
                 NavHost(
                     navController = navController,
@@ -79,7 +96,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("main") {
-                        MainScreen(voteListViewModel)
+                        MainScreen(voteListViewModel, navController)
                     }
 
                     composable(
@@ -123,6 +140,11 @@ class MainActivity : ComponentActivity() {
                             viewModel = voteListViewModel,
                         )
                     }
+                    composable(BottomNavItem.MyPage.route) {
+                        MyPageScreen(
+                            navController = navController
+                        )
+                    }
                 }
             }
         }
@@ -131,13 +153,14 @@ class MainActivity : ComponentActivity() {
 
 sealed class BottomNavItem(val route:String, val icon: ImageVector, val label: String) {
     object VoteList: BottomNavItem("voteList", Icons.AutoMirrored.Filled.List, "투표")
-    object Chat: BottomNavItem("chat", Icons.AutoMirrored.Filled.List, "채팅")
-    object MyPage: BottomNavItem("myPage", Icons.AutoMirrored.Filled.List, "마이페이지")
+    object Chat: BottomNavItem("chat", Icons.Filled.ChatBubble, "채팅")
+    object MyPage: BottomNavItem("myPage", Icons.Filled.AccountBox, "마이페이지")
 }
 
 @Composable
 fun MainScreen(
-    voteListViewModel: VoteListViewModel
+    voteListViewModel: VoteListViewModel,
+    parentNavController: NavHostController
 ) {
     val navController = rememberNavController()
     Scaffold (
@@ -159,21 +182,33 @@ fun MainScreen(
             composable(BottomNavItem.VoteList.route) {
                 VoteListScreen(
                     navController = navController,
+                    parentNavController = parentNavController,
                     viewModel = voteListViewModel,
                     onVoteClicked = { voteId ->
-                        navController.navigate("vote/$voteId")
+                        parentNavController.navigate("vote/$voteId")
                     }
                 )
             }
             composable(BottomNavItem.Chat.route) {
-                ChatScreen()
+                ChatScreen(navController)
             }
 
-            composable(BottomNavItem.MyPage.route) {
-                MyPageScreen(
-                    navController = navController
+            composable("chatRoom/{chatRoomId}/{otherUserId}/{otherNickname}") { backStackEntry ->
+                val chatRoomId = backStackEntry.arguments?.getString("chatRoomId") ?: ""
+                val otherUserId = backStackEntry.arguments?.getString("otherUserId") ?: ""
+                val otherNickname = backStackEntry.arguments?.getString("otherNickname") ?: ""
+                ChatRoomScreen(
+                    chatRoomId,
+                    otherUserId,
+                    otherNickname
                 )
             }
+            composable(BottomNavItem.MyPage.route) {
+                MyPageScreen(
+                    navController = parentNavController
+                )
+            }
+
         }
     }
 }

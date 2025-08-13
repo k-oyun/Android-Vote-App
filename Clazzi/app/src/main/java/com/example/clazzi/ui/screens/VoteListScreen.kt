@@ -55,7 +55,8 @@ import com.google.firebase.auth.FirebaseAuth
 fun VoteListScreen(
     navController: NavHostController,
     viewModel: VoteListViewModel,
-    onVoteClicked: (String) -> Unit
+    onVoteClicked: (String) -> Unit,
+    parentNavController: NavController
 ) {
     val voteList by viewModel.voteList.collectAsState()
     Scaffold(topBar = {
@@ -64,7 +65,7 @@ fun VoteListScreen(
             actions = {
                 IconButton(
                     onClick = {
-                        navController.navigate("myPage")
+                        parentNavController.navigate("myPage")
                     }
                 ) {
                     Icon(
@@ -87,9 +88,9 @@ fun VoteListScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding),
-
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+
         ) {
             items(voteList) { vote ->
                 VoteItem(vote) {
@@ -154,14 +155,14 @@ fun VoteItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun VoteListScreenPreview() {
-    ClazziTheme {
-        VoteListScreen(
-            navController = NavHostController(LocalContext.current),
-            viewModel = viewModel(),
-            onVoteClicked = {}
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun VoteListScreenPreview() {
+//    ClazziTheme {
+//        VoteListScreen(
+//            navController = NavHostController(LocalContext.current),
+//            viewModel = viewModel(),
+//            onVoteClicked = {}
+//        )
+//    }
+//}
