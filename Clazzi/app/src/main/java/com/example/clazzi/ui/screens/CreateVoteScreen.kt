@@ -55,6 +55,10 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
+class CreateVoteScreenViewModel() {
+
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateVoteScreen(
@@ -72,8 +76,12 @@ fun CreateVoteScreen(
 
     // 마감일 스테이트
     var deadlineDate by remember { mutableStateOf<Date?>(null) }
+//    val createVoteScreenViewModel = CreateVoteScreenViewModel()
 
 //    val optionText: List<String> = arrayListOf("항목 1", "항목 2")
+
+    // 앱의 기본 레이아웃 구조(탑바, 바텀네비게이션) 제공
+    // 자동으로 탑바는 위, 바텀 네비게이션은 아래에 위치 시킴
     Scaffold(
         topBar = {
             TopAppBar(
@@ -105,11 +113,13 @@ fun CreateVoteScreen(
                     painterResource(id = android.R.drawable.ic_menu_gallery),
                 contentDescription = "투표 사진",
                 contentScale = ContentScale.Crop,
+                // 모디파이어 : UI 요소, 크기, 배경, 정렬 등 속성 저장
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
                     .background(Color.LightGray)
                     .align(Alignment.CenterHorizontally)
+                    // 클릭커블의 역할: 해당 UI 요소가 클릭 이벤트를 받을 수 있다.
                     .clickable {
                         showImagePickTypeSheet = true
                     }

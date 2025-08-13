@@ -56,6 +56,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 컴포저블에서 상태가 변경될 때 UI가 갱신될 수 있는 이유는 Compose가 상태를 관찰하고 있기 때문
+        // setContent 안에 작성되는 모든 스테이트(상태)만 관찰이 가능하다.
+
         setContent {
             var name = remember { mutableStateOf("김한수") }
             ClazziTheme {
@@ -84,6 +87,9 @@ class MainActivity : ComponentActivity() {
                             .set(mapOf("nickname" to nickname))
                     }
                 }
+
+                // 네브 호스트, 네브 컨트롤러 : 화면 간의 네비게이션(이동) 관리하는 역할
+                // 네브 호스트 : 각 화면의 경로를 정해 놓은 곳
 
                 NavHost(
                     navController = navController,
@@ -168,6 +174,8 @@ fun MainScreen(
             BottomNavigationBar(navController)
         }
     ) { innerPadding ->
+
+
         NavHost(
             navController = navController,
             startDestination = "voteList",

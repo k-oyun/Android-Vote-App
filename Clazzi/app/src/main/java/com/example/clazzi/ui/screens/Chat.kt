@@ -54,6 +54,7 @@ fun ChatScreen(navController: NavController) {
         }
     ) { innerPadding->
         LazyColumn(modifier = Modifier.padding(innerPadding)) {
+            // 레이지 컬럼 안에서 아이템을 반복적으로 그릴때는 items() 함수를 사용한다.
             items(users) { (uid,nickname) ->
                 ChatItem(uid, nickname, navController)
             }
